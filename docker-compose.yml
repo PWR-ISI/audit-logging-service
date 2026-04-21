@@ -1,0 +1,32 @@
+services:
+  app:
+    build: .
+    container_name: audit-logging-service
+    command: gunicorn audit_logging.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DJANGO_DB_HOST=db
+      - DJANGO_DB_NAME=audit_logging_db
+      - DJANGO_DB_USER=audit_logging_user
+      - DJANGO_DB_PASSWORD=othersecretpassword
+    ports:
+      - "8002:8000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres-audit-logging-service
+    restart: always
+    environment:
+      POSTGRES_DB: audit_logging_db
+      POSTGRES_USER: audit_logging_user
+      POSTGRES_PASSWORD: othersecretpassword
+    volumes:
+      - postgres-audit-logging-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-audit-logging-data:
